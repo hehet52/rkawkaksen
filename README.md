@@ -40,3 +40,10 @@ drowsiness_project/
   confusion_matrix.png
   requirements.txt
 
+  ## 모델 파일 안내
+drowsiness_model.pkl 과 scaler.pkl 은 용량 문제로 GitHub에 포함되지 않습니다.
+저장소를 받은 후 아래 명령어로 직접 생성하세요.
+
+pip install -r requirements.txt
+python train.py
+
