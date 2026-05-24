@@ -46,8 +46,8 @@ def predict_drowsiness(user_id, ear, mar, head_angle):
 
     current_time = time.time()  # 현재 시간 측정 (초 단위)
 
-    # 2. 모델 예측 결과가 1(눈감김)인 경우
-    if raw_prediction == 1:
+    # 2. 모델 예측 결과가 2(눈감김)인 경우 왜인지 ai가 눈 감김 상태를 2로 학습함...
+    if raw_prediction == 2:
         # 이 유저가 방금 막 처음으로 눈을 감았다면, 그 시점의 시간을 기록
         if user_id not in user_closed_timestamps or user_closed_timestamps[user_id] is None:
             user_closed_timestamps[user_id] = current_time
