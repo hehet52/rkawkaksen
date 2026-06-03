@@ -4,7 +4,15 @@ import joblib
 import numpy as np
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from livekit.api import AccessToken
 
+# 프론트엔드 입력값 검증용 모델
+class TokenRequest(BaseModel):
+    identity: str = Field(..., description="접속하는 유저의 고유 ID (예: testuser)", min_length=1)
+    room_name: str = Field(default="drowsiness-room", description="접속할 실시간 영상 스트리밍 방 이름")
+    
 # 현재 폴더 경로 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 models = {}
@@ -32,6 +40,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+# 기존에 있던 app = FastAPI(...) 코드 바로 아랫줄에 붙여넣으세요!
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # [핵심] 5초 이상 눈 감김 지속 여부 판단 로직
@@ -100,3 +116,40 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
         # 메모리 관리를 위해 유저가 나가면 타이머 데이터 삭제
         if user_id in user_closed_timestamps:
             del user_closed_timestamps[user_id]
+            # 보안용 환경변수 설정 (기본값 세팅)
+LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "devkey")
+LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "secret")
+
+@app.post("/api/livekit/token", summary="LiveKit 스트리밍 토큰 자동 발급", tags=["Streaming"])
+def generate_livekit_token(request: TokenRequest):
+    """
+    프론트엔드 요청 시 라이브키트 방 진입용 토큰을 자동으로 생성합니다.
+    """
+    if not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="서버 설정 오류: LiveKit Key가 없습니다.")
+        
+    try:
+        grant = AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET) \
+            .with_identity(request.identity) \
+            .with_name(request.identity)
+            
+        grant.with_grants(AccessToken.Grants(
+            room_join=True,
+            room=request.room_name,
+            can_publish=True,
+            can_subscribe=True
+        ))
+
+        token_jwt = grant.to_jwt()
+
+        return {
+            "success": True,
+            "token": token_jwt,
+            "room_name": request.room_name,
+            "identity": request.identity
+        }
+
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"토큰 생성 실패: {str(e)}")
