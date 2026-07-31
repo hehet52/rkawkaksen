@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CamStudy - 실시간 캠스터디</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- MediaPipe FaceMesh (얼굴 인식 AI 라이브러리) 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- 상단 헤더 -->
+  <header class="top-bar">
+    <div class="logo">👥 CamStudy <span class="room-info">집중 스터디룸 4/4</span></div>
+    <div class="timer-box">
+      <div class="timer">⏱️ 01:25:30</div>
+      <div class="sub-text">오늘의 목표 : 3시간 공부</div>
+    </div>
+    <button class="btn-exit">나가기</button>
+  </header>
+
+  <!-- 메인 레이아웃 -->
+  <main class="main-container">
+    <!-- 좌측: 4분할 카메라 그리드 -->
+    <section class="video-grid">
+      <!-- 1번: 내 화면 (실제 카메라는 여기에 뜸) -->
+      <div class="video-card">
+        <span class="status-badge focus" id="my-status">🟢 정상</span>
+        <video id="my-webcam" autoplay playsinline muted></video>
+        <div class="user-label">나 (김수민)</div>
+      </div>
+      <!-- 2, 3, 4번: 팀원 화면 (다음 주자가 LiveKit으로 채울 더미 영역) -->
+      <div class="video-card placeholder-card">
+        <span class="status-badge drowsy">🚨 졸음</span>
+        <div class="dummy-text">이지연 (대기중)</div>
+      </div>
+      <div class="video-card placeholder-card">
+        <span class="status-badge focus">🟢 정상</span>
+        <div class="dummy-text">박정우 (대기중)</div>
+      </div>
+      <div class="video-card placeholder-card">
+        <span class="status-badge drowsy">🚨 졸음</span>
+        <div class="dummy-text">최하은 (대기중)</div>
+      </div>
+    </section>
+
+    <!-- 우측: 정보 사이드바 -->
+    <aside class="sidebar">
+      <div class="panel">
+        <h3>멤버 상태</h3>
+        <ul class="member-list">
+          <li><span>김수민 (나)</span> <span class="text-green">🟢 정상</span></li>
+          <li><span>이지연</span> <span class="text-red">🚨 졸음</span></li>
+          <li><span>박정우</span> <span class="text-green">🟢 정상</span></li>
+          <li><span>최하은</span> <span class="text-red">🚨 졸음</span></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h3>AI 집중도 분석</h3>
+        <div class="gauge-container">
+          <div class="gauge-value">75%</div>
+          <div class="gauge-desc">전체 집중도 양호!</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>오늘의 기록</h3>
+        <p>공부 시간: 01:25:30</p>
+        <p>집중 시간: 00:56:20</p>
+        <p>졸림 감지: 2회</p>
+        <button class="btn-download">데이터 다운로드 (CSV)</button>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
